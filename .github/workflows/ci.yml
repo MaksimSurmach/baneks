@@ -1,5 +1,8 @@
 name: frontend
 on: [push, pull_request]
+env:
+  VITE_NEON_DATA_API_URL: https://ep-proud-sound-baou4sxl.apirest.c-8.eu-central-1.aws.neon.tech/banksDB/rest/v1
+  VITE_NEON_AUTH_URL: https://ep-proud-sound-baou4sxl.neonauth.c-8.eu-central-1.aws.neon.tech/banksDB/auth
 permissions:
   contents: read
 jobs:
