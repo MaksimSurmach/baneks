@@ -1,2 +1,19 @@
-import { test, expect } from '@playwright/test'
-test('navigation and direct refresh remain in SPA', async ({ page }) => { await page.goto('/'); await expect(page).toHaveURL(/\/jokes$/); await page.getByRole('link', { name: 'Атлас', exact: true }).click(); await expect(page.getByRole('heading', { name: 'Атлас в разработке' })).toBeVisible(); await page.reload(); await expect(page.getByRole('heading', { name: 'Атлас в разработке' })).toBeVisible(); await page.goBack(); await expect(page).toHaveURL(/\/jokes$/); await page.goto('/unknown'); await expect(page.getByRole('heading', { name: 'Страница не найдена' })).toBeVisible() })
+import { test, expect } from "@playwright/test";
+test("navigation and direct refresh remain in SPA", async ({ page }) => {
+  await page.goto("/");
+  await expect(page).toHaveURL(/\/jokes$/);
+  await page.getByRole("link", { name: "Атлас", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Атлас в разработке" }),
+  ).toBeVisible();
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: "Атлас в разработке" }),
+  ).toBeVisible();
+  await page.goBack();
+  await expect(page).toHaveURL(/\/jokes$/);
+  await page.goto("/unknown");
+  await expect(
+    page.getByRole("heading", { name: "Страница не найдена" }),
+  ).toBeVisible();
+});
