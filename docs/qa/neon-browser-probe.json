@@ -1,0 +1,53 @@
+{
+  "origin": "http://localhost:4173",
+  "results": [
+    {
+      "name": "jokes",
+      "status": 400,
+      "corsReadable": true,
+      "count": null,
+      "rows": null,
+      "errorCategory": "authentication-required"
+    },
+    {
+      "name": "terms",
+      "status": 400,
+      "corsReadable": true,
+      "count": null,
+      "rows": null,
+      "errorCategory": "authentication-required"
+    },
+    {
+      "name": "rating",
+      "status": 400,
+      "corsReadable": true,
+      "count": null,
+      "rows": null,
+      "errorCategory": "authentication-required"
+    },
+    {
+      "name": "array",
+      "status": 400,
+      "corsReadable": true,
+      "count": null,
+      "rows": null,
+      "errorCategory": "authentication-required"
+    },
+    {
+      "name": "combined",
+      "status": 400,
+      "corsReadable": true,
+      "count": null,
+      "rows": null,
+      "errorCategory": "authentication-required"
+    },
+    {
+      "name": "null-rating",
+      "status": 400,
+      "corsReadable": true,
+      "count": null,
+      "rows": null,
+      "errorCategory": "authentication-required"
+    }
+  ]
+}

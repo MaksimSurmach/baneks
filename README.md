@@ -21,3 +21,15 @@ Node 22+ (CI uses 24). `npm ci`, `cp .env.example .env.local`, then `npm run dev
 7. Rollback: Pages → project → Deployments → previous known-good production deployment → Rollback. Keep API endpoint consistent with that version; changes to Vite variables require a rebuild.
 
 No Cloudflare deployment credentials are configured in this session. GitHub connection, actual preview origin/CORS and Pages status/fallback verification remain release steps; no deployed URL is claimed.
+
+## Data client contract
+
+`src/lib/neon-data-api/client.ts` uses browser GET only with `credentials: omit`, no bearer tokens. Response schemas are validated; errors are safe typed categories. Requests have a 12-second timeout and accept AbortSignal. Jokes use deterministic ID order or `catalog_rating.desc.nullslast,id.asc`. The standard page is 20 rows (21 requested for lookahead if total count is unavailable); all requests stay within the 100-row cap.
+
+Filters are **OR within each kind, AND across kinds**, using nested PostgREST `and=(or(term_ids.cs.{...}),...)`. IDs and URL values are validated before network requests. Taxonomy is cached after validation; no per-row tag queries. Exact count is requested using `Prefer: count=exact`; when not supplied, catalogue has next/previous pagination without an invented total.
+
+Random selection uses exact filtered count + a uniform random integer offset in deterministic ID order, excluding up to 16 IDs. If only one match exists, the exclusion is removed. At most three bounded read requests; cost of large offsets depends on database. Under concurrent publication changes, count/offset is not one database snapshot. If exact count is unavailable, random returns a safe data error rather than pretending a small sample is uniformly random.
+
+### Live API blocker (2026-10-13, Europe/Warsaw)
+
+`node scripts/probe-neon.mjs` performs **real read-only browser fetch** from localhost (no interceptions) through the environment proxy. The result is saved in `docs/qa/neon-browser-probe.json`. All six GET probes returned **HTTP 400, authentication required**. CORS allowed reading those error responses, but no published records were returned. Anonymous data access, exact count, array containment, combined filters and NULLS LAST remain **unverified on production**. The observed Neon configuration declares `anonymous` and `baneks_public`; it was not modified. Do not solve this by putting a private JWT/connection string into the browser. The endpoint owner must restore anonymous reads or supply a working public read-only endpoint, then rerun the probe and the live smoke. Hidden known IDs were not provided and cannot currently be validated.
