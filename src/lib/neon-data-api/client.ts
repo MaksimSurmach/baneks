@@ -1,3 +1,4 @@
+import { createAnonymousTokenProvider } from "./anonymous-token";
 import type { Joke, Term } from "./types";
 import { DataApiError, httpError, normalizeError } from "./errors";
 import { joke, term, rows, countFromRange } from "./validation";
@@ -16,7 +17,11 @@ export type JokePage = {
 export const REQUEST_TIMEOUT = 12000;
 export function createClient(
   baseUrl: string,
-  options: { timeout?: number; fetch?: typeof fetch } = {},
+  options: {
+    timeout?: number;
+    fetch?: typeof fetch;
+    getToken?: (signal: AbortSignal) => Promise<string>;
+  } = {},
 ) {
   const fetcher = options.fetch ?? fetch;
   let cachedTerms: Term[] | undefined;
@@ -37,12 +42,19 @@ export function createClient(
       controller.abort();
     }, options.timeout ?? REQUEST_TIMEOUT);
     try {
+      const token = await options.getToken?.(controller.signal);
+      if (controller.signal.aborted)
+        throw new DOMException("Cancelled", "AbortError");
       const response = await fetcher(
         `${baseUrl.replace(/\/$/, "")}/${path}?${params}`,
         {
           method: "GET",
           credentials: "omit",
-          headers: { Accept: "application/json", Prefer: "count=exact" },
+          headers: {
+            Accept: "application/json",
+            Prefer: "count=exact",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
           signal: controller.signal,
         },
       );
@@ -153,4 +165,8 @@ export function createClient(
   }
   return { listJokes, getJoke, listTerms, getRandomJoke };
 }
-export const api = createClient(import.meta.env.VITE_NEON_DATA_API_URL ?? "");
+export const api = createClient(import.meta.env.VITE_NEON_DATA_API_URL ?? "", {
+  getToken: createAnonymousTokenProvider(
+    import.meta.env.VITE_NEON_AUTH_URL ?? "",
+  ),
+});

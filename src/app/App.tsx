@@ -1,19 +1,17 @@
-import {
-  NavLink,
-  Outlet,
-  ScrollRestoration,
-  useLocation,
-} from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { api } from "../lib/neon-data-api/client";
 import { useRequest } from "../lib/useRequest";
 import { TaxonomyContext } from "../components/layout/TaxonomyContext";
+import RenderBoundary from "../components/feedback/RenderBoundary";
+import { useScrollRestoration } from "../lib/useScrollRestoration";
 import styles from "../components/layout/Layout.module.css";
 export default function App() {
   const taxonomy = useRequest("terms", api.listTerms),
     location = useLocation(),
     main = useRef<HTMLElement>(null);
   const [broken, setBroken] = useState(false);
+  useScrollRestoration(location.pathname + location.search);
   useEffect(() => {
     const frame = requestAnimationFrame(() =>
       main.current?.focus({ preventScroll: true }),
@@ -46,13 +44,14 @@ export default function App() {
         </div>
       </header>
       <main id="content" ref={main} tabIndex={-1} className={styles.main}>
-        <Outlet />
+        <RenderBoundary key={location.pathname}>
+          <Outlet />
+        </RenderBoundary>
       </main>
       <footer className={styles.footer}>
         Банк анекдотов категории Б{" "}
         <span>Сначала история. Всё остальное — потом.</span>
       </footer>
-      <ScrollRestoration getKey={(l) => l.pathname + l.search} />
     </TaxonomyContext.Provider>
   );
 }

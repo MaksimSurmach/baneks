@@ -5,13 +5,13 @@ import CatalogPage from "../pages/CatalogPage";
 import JokePage from "../pages/JokePage";
 import RandomPage from "../pages/RandomPage";
 import TopicPage from "../pages/TopicPage";
-import RecoveryPanel from "../components/feedback/RecoveryPanel";
+import ErrorPage from "../pages/errors/ErrorPage";
+import { routeKinds } from "../pages/errors/content";
 import { DataApiError } from "../lib/neon-data-api/errors";
-import { routeErrorPaths } from "./routes";
 const Atlas = lazy(() => import("../pages/AtlasPlaceholder"));
 const fallback = (
   <div className="simple">
-    <RecoveryPanel error={new DataApiError("not-found", 404)} />
+    <ErrorPage error={new DataApiError("not-found", 404)} />
   </div>
 );
 export const router = createBrowserRouter([
@@ -19,7 +19,7 @@ export const router = createBrowserRouter([
     element: <App />,
     errorElement: (
       <div className="simple">
-        <RecoveryPanel error={new DataApiError("server", 500)} />
+        <ErrorPage error={new DataApiError("server", 500)} />
       </div>
     ),
     children: [
@@ -42,16 +42,13 @@ export const router = createBrowserRouter([
           </Suspense>
         ),
       },
-      ...routeErrorPaths.map((path) => ({
+      ...Object.entries(routeKinds).map(([path, kind]) => ({
         path: "/" + path,
-        element:
-          path === "404" ? (
-            fallback
-          ) : (
-            <div className="simple">
-              <RecoveryPanel error={new DataApiError("server", 500)} />
-            </div>
-          ),
+        element: (
+          <div className="simple">
+            <ErrorPage error={new DataApiError(kind)} />
+          </div>
+        ),
       })),
       { path: "*", element: fallback },
     ],

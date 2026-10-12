@@ -25,6 +25,14 @@ export const jokes = Array.from({ length: 45 }, (_, i) => ({
   term_ids: i < 35 ? [1, 2, 3] : [4, 3],
 }));
 export async function mockApi(page: Page) {
+  await page.route("**/auth/token/anonymous", (r) =>
+    r.fulfill({
+      json: {
+        token: "anonymous.test.token",
+        expires_at: Math.floor(Date.now() / 1000) + 900,
+      },
+    }),
+  );
   await page.route("**/rest/v1/**", async (route) => {
     const url = new URL(route.request().url());
     let data = url.pathname.endsWith("/terms") ? [...terms] : [...jokes];

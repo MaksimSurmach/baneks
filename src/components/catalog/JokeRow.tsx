@@ -1,3 +1,4 @@
+import { termLabel } from "../../lib/termLabel";
 import { Link } from "react-router-dom";
 import type { Joke } from "../../lib/neon-data-api/types";
 import { useTaxonomy } from "../layout/TaxonomyContext";
@@ -25,7 +26,7 @@ export function JokeTags({ joke }: { joke: Joke }) {
           to={`/topics/${t.kind}/${encodeURIComponent(t.slug)}`}
           title="Предложено ИИ"
         >
-          {t.name}
+          {termLabel(t)}
         </Link>
       ))}
       {taxonomy.status === "success" && !tags.length && (

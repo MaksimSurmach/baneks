@@ -1,41 +1,78 @@
 # Банк анекдотов категории Б
 
-Frontend-only React / TypeScript / Vite SPA. Published content is read directly from the public Neon Data API; no backend, authentication or database credentials. Search and Atlas are deferred.
+Готовый frontend V1: React + TypeScript + Vite + React Router, статический Cloudflare Pages. Браузер напрямую читает настоящие опубликованные анекдоты из Neon Data API. Панорама и шрифты включены в сборку. Backend, Worker, регистрация, аккаунты и поиск не реализуются; Атлас — оформленная страница «в разработке».
 
-## Local development (macOS/Linux)
+## Запуск
 
-Node 22+ (CI uses 24). `npm ci`, `cp .env.example .env.local`, then `npm run dev`.
+Node 22.12+ (CI: Node 24). На macOS/Linux:
 
-`npm run check` runs lint, TypeScript, unit tests and production build.
-`npx playwright install chromium` then `npm run test:e2e` runs browser tests.
-`npm run build` produces `dist`; `npm run preview` serves the static production build.
+```sh
+git clone https://github.com/MaksimSurmach/baneks.git
+cd baneks
+git switch feature/max-1098-errors-qa
+npm ci
+cp .env.example .env.local
+npm run dev
+```
 
-## Cloudflare Pages
+Открыть адрес из Vite (`http://localhost:5173`). Ветка `feature/max-1098-errors-qa` содержит **все четыре задачи**, включая предыдущие слои. Никаких приватных ключей для запуска не нужно.
 
-1. Workers & Pages → Create → Pages → Connect to Git → GitHub repository `MaksimSurmach/baneks`. Grant repository access.
-2. Production branch `master`; root directory `/`; build command `npm run build`; output `dist`; Node version `24`.
-3. Set public `VITE_NEON_DATA_API_URL` from `.env.example` for **both Production and Preview**. Never use a PostgreSQL URL or private token in a `VITE_` variable.
-4. Enable preview branches for the feature branches; disable automatic production publication until the stack is reviewed and merged. The top QA branch contains the whole release.
-5. `_redirects` ships `/* /index.html 200` for deep links. Keep no top-level `404.html`. `_headers` applies browser security rules; adjust `connect-src` if changing API host. No Functions/Worker required.
-6. On the actual preview check direct `/jokes/1`, refresh, unknown route, and `/500` with `curl -I`. SPA error screens normally have HTTP **200**, not a dynamic 400/500 status. Local preview is evidence for the application only, not proof of Pages behavior.
-7. Rollback: Pages → project → Deployments → previous known-good production deployment → Rollback. Keep API endpoint consistent with that version; changes to Vite variables require a rebuild.
+```sh
+npm run check                 # lint, TypeScript, 52 unit/integration tests, build
+npx playwright install chromium
+npm run test:e2e              # mock API: interactions, failures, accessibility, screenshots
+npm run test:live             # production dist → real Neon, no mocks
+npm run build
+npm run preview              # static production bundle
+```
 
-No Cloudflare deployment credentials are configured in this session. GitHub connection, actual preview origin/CORS and Pages status/fallback verification remain release steps; no deployed URL is claimed.
+На чистом Linux для браузера может понадобиться `npx playwright install --with-deps chromium`. `npm run test:live` запускается после build; внешний Neon должен быть доступен. Доступ к браузеру не даёт права менять записи базы.
 
-## Data client contract
+## Публичный доступ Neon
 
-`src/lib/neon-data-api/client.ts` uses browser GET only with `credentials: omit`, no bearer tokens. Response schemas are validated; errors are safe typed categories. Requests have a 12-second timeout and accept AbortSignal. Jokes use deterministic ID order or `catalog_rating.desc.nullslast,id.asc`. The standard page is 20 rows (21 requested for lookahead if total count is unavailable); all requests stay within the 100-row cap.
+В `.env.example` заданы два **публичных HTTPS адреса**:
 
-Filters are **OR within each kind, AND across kinds**, using nested PostgREST `and=(or(term_ids.cs.{...}),...)`. IDs and URL values are validated before network requests. Taxonomy is cached after validation; no per-row tag queries. Exact count is requested using `Prefer: count=exact`; when not supplied, catalogue has next/previous pagination without an invented total.
+- `VITE_NEON_DATA_API_URL` — существующий REST endpoint `/banksDB/rest/v1`.
+- `VITE_NEON_AUTH_URL` — выдача короткоживущего anonymous token `/banksDB/auth`.
 
-Random selection uses exact filtered count + a uniform random integer offset in deterministic ID order, excluding up to 16 IDs. If only one match exists, the exclusion is removed. At most three bounded read requests; cost of large offsets depends on database. Under concurrent publication changes, count/offset is not one database snapshot. If exact count is unavailable, random returns a safe data error rather than pretending a small sample is uniformly random.
+Neon требует JWT даже для роли `anonymous`. Браузер делает GET `/token/anonymous` без входа, cookies и создания пользователя, хранит токен только в памяти до истечения и использует его для чтения REST. Это не приватный API key. Сервис Managed Neon Auth включён с разрешения владельца для этой выдачи; его служебная схема создаётся Neon автоматически. Нет собственной системы авторизации или SQL migrations в приложении.
 
-### Live API blocker (2026-10-13, Europe/Warsaw)
+Data API настроен: **только `baneks_public`**, роль `anonymous`, max100 строк, CORS `*`, aggregates disabled. Роль anonymous имеет только SELECT на `jokes`, `terms`, `joke_terms`. Анекдоты, исходная схема `anek` и публикационные статусы не изменялись.
 
-`node scripts/probe-neon.mjs` performs **real read-only browser fetch** from localhost (no interceptions) through the environment proxy. The result is saved in `docs/qa/neon-browser-probe.json`. All six GET probes returned **HTTP 400, authentication required**. CORS allowed reading those error responses, but no published records were returned. Anonymous data access, exact count, array containment, combined filters and NULLS LAST remain **unverified on production**. The observed Neon configuration declares `anonymous` and `baneks_public`; it was not modified. Do not solve this by putting a private JWT/connection string into the browser. The endpoint owner must restore anonymous reads or supply a working public read-only endpoint, then rerun the probe and the live smoke. Hidden known IDs were not provided and cannot currently be validated.
+[Официальный протокол anonymous access](https://neon.com/docs/data-api/access-control#2-the-anonymous-role). Не подставлять connection string, private JWT или пароль в `VITE_*`.
 
-## Catalogue UI
+## Данные и URL
 
-`/jokes` keeps `topic`, `character`, `format` (comma-separated IDs), `sort=id|rating`, and `page` in the URL. Multi-select OR-within/AND-across behavior survives refresh and back. `/topics/:kind/:slug` resolves a public taxonomy entry to its filter URL. `/jokes/random` selects then replaces the URL with canonical `/jokes/:id`; subsequent selection carries the previous ID and the current filters. Sidebar failures preserve core joke reading and have an independent retry.
+Пагинация: 20 анекдотов, максимум 100 строк на запрос. Дополнительная 21-я строка даёт lookahead, если exact count отсутствует. Сортировки: `id.asc` либо `catalog_rating.desc.nullslast,id.asc`. NULL — «Без оценки», не нулевая или придуманная оценка.
 
-Quiet Archive uses the supplied independent panorama, self-hosted Literata/Golos Text, paper tokens, unboxed text rows and a native keyboard-accessible mobile filter dialog. Joke bodies render as escaped React text with preserved linebreaks; long list excerpts link to complete reader text. Sharing uses Web Share when available, clipboard fallback otherwise, and explicit manual guidance when browser APIs are unavailable. See `docs/design/IMPLEMENTATION_NOTES.md` for reference comparison and intentional refinements.
+Фильтры: **OR внутри типа и AND между типами** через PostgREST `and=(or(term_ids.cs.{…}),…)`. `topic`, `character`, `format` в URL содержат ID через запятую; `page` и `sort=id|rating` сохраняются при обновлении и возврате. Недопустимые значения приводят к 400 с рабочим сбросом. `/topics/:kind/:slug` открывает соответствующую рубрику. Тексты не имеют придуманного заголовка.
+
+`/jokes/random` выбирает случайный опубликованный ID и заменяет адрес на `/jokes/:id`. Следующий выбор сохраняет фильтры и исключает предыдущий ID; при единственном совпадении повтор разрешён. Алгоритм: exact count + равномерный случайный offset, до трёх ограниченных запросов. Большие offset зависят от производительности базы; count/offset не являются одной транзакцией при конкурентном изменении публикаций. Без exact count случайный выбор сообщает об ошибке данных, не имитирует равномерность маленькой выборкой.
+
+Клиент валидирует JSON и поля, принимает AbortSignal, ограничивает запрос вместе с выдачей token 12 секундами. Уход и смена фильтров отменяют запросы; устаревший ответ не заменяет новый. Нет бесконечных автоматических повторов. Рубрики кешируются после валидации, без N+1 запросов. Их отказ не мешает читать уже полученные анекдоты.
+
+## Дизайн и ошибки
+
+Quiet Archive: исходная самостоятельная иллюстрация, Literata/Golos Text с локальной доставкой, бумажная палитра, текстовые строки и тонкие разделители. На 390/768px фильтры — native dialog с Tab/Escape/focus trap. Тексты выводятся через escaped React text, с абзацами; длинные фрагменты открываются полностью в reader. Форматам даны русские подписи, ID/slug не меняются. Предварительная AI-разметка обозначена явно.
+
+Копирование и Web Share работают с честным fallback для недоступных браузерных API. Позиция чтения восстанавливается при возврате к результатам. Поиск явно отключён, ссылка «Атлас» работает как placeholder. [Примечания к референсу](docs/design/IMPLEMENTATION_NOTES.md).
+
+Отдельные маршруты: `/400`, `/403`, `/404`, `/429`, `/500`, `/503`, `/timeout`, `/offline`, `/connection`, `/data-error`; 401/408/502/504 также имеют соответствующие страницы. Ошибки API используют те же варианты, не подменяют отказ пустым результатом и не показывают raw SQL, stack trace или credentials. Retry повторяет исходный запрос с фильтрами; доступный `Retry-After` блокирует преждевременный повтор. Header должен быть CORS-exposed, чтобы браузер мог его прочесть. React Error Boundary обеспечивает safe 500 и восстановление.
+
+## Проверка живого API
+
+`NEON_HIDDEN_TEST_ID=101 node scripts/probe-neon.mjs` проверяет настоящие браузерные GET/CORS, count, array containment, combined filters, NULLS LAST и отсутствие скрытого ID. Использует environment HTTP proxy только там, где он задан. Результат: `docs/qa/neon-browser-probe.json`. В проверенной базе: **40 225 опубликованных, 84 рубрики, 9 993 без оценки**. UI не хардкодит эти числа.
+
+`tests/live/neon.spec.ts` проверяет production bundle: каталог → фильтр → page2 → reload → rating → random → next → скрытый ID, плюс 1440/768/390. Отказы моделируются только через Playwright interception. Ссылки на отчёт и скриншоты будут в финальном PR.
+
+## Cloudflare Pages и rollback
+
+1. Workers & Pages → Create → Pages → Connect to Git → `MaksimSurmach/baneks`. Дать GitHub доступ только к этому репозиторию.
+2. Production branch `master`; root `/`; build `npm run build`; output `dist`; Node `24`.
+3. Задать **оба** публичных `VITE_NEON_DATA_API_URL` и `VITE_NEON_AUTH_URL` из `.env.example` для Production **и** Preview. Изменение Vite env требует rebuild.
+4. Включить feature preview для `feature/max-1098-errors-qa`; production публиковать после ревью и merge всей последовательности. Автоматический merge не выполнялся.
+5. `_redirects`: `/* /index.html 200`; нет top-level `404.html`, Functions или Worker. `_headers` содержит CSP, локальные fonts/scripts/styles и разрешение Neon HTTPS. Если API host меняется, обновить `connect-src`.
+6. На фактическом preview повторить live smoke и открыть `/jokes/1`, refresh, unknown route, `/500`. Проверить `curl -I`: SPA-страница ошибки обычно имеет HTTP **200**, а не динамический 400/500. Local preview подтверждает bundle/fallback, но не реальное поведение Cloudflare.
+7. Rollback: Pages → Deployments → известный рабочий production deploy → Rollback. Согласовать env API с выбранной версией.
+
+Cloudflare credentials в окружении отсутствуют, поэтому **публичный deploy URL не заявляется**. Остались GitHub→Pages connection, preview origin/CORS и фактическая проверка Pages HTTP fallback. Фронтенд уже запускается локально на живом Neon.

@@ -7,3 +7,4 @@ test-results/
 *.tsbuildinfo
 work/
 .DS_Store
+live-test-results/

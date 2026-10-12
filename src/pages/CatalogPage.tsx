@@ -1,3 +1,4 @@
+import { termLabel } from "../lib/termLabel";
 import { useCallback, useRef } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../lib/neon-data-api/client";
@@ -151,8 +152,9 @@ export default function CatalogPage() {
                 }
               >
                 {taxonomy.status === "success"
-                  ? (taxonomy.value.find((t) => t.id === id)?.name ??
-                    `Рубрика ${id}`)
+                  ? ((taxonomy.value.find((t) => t.id === id)
+                      ? termLabel(taxonomy.value.find((t) => t.id === id)!)
+                      : undefined) ?? `Рубрика ${id}`)
                   : `Рубрика ${id}`}{" "}
                 <span aria-hidden="true">×</span>
                 <span className="sr-only"> — убрать фильтр</span>

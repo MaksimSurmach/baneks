@@ -1,3 +1,4 @@
+import { termLabel } from "../../lib/termLabel";
 import { useId, useState } from "react";
 import { useTaxonomy } from "../layout/TaxonomyContext";
 import type { CatalogQuery } from "../../lib/neon-data-api/query";
@@ -71,7 +72,7 @@ export default function Filters({
                         checked={query.filters[kind]?.includes(t.id) ?? false}
                         onChange={() => toggle(kind, t.id)}
                       />
-                      <span>{t.name}</span>
+                      <span>{termLabel(t)}</span>
                     </label>
                   ))}
                   {!terms.length && (
