@@ -33,10 +33,46 @@ for (const [status, title] of statuses)
       page.getByRole("heading", { name: "Здесь пока тихо" }),
     ).toHaveCount(0);
     fail = false;
-    await page.getByRole("button", { name: "Повторить", exact: true }).click();
+    const retry = page.getByRole("button", { name: "Повторить", exact: true });
+    if (status === 400 || status === 404) {
+      // Repeating the same request cannot help; recovery is navigation.
+      await expect(retry).toHaveCount(0);
+      await page.getByRole("link", { name: "В каталог" }).click();
+      await expect(page.locator("article")).toHaveCount(20);
+      return;
+    }
+    await retry.click();
     await expect(page.locator("article")).toHaveCount(20);
     await expect(page).toHaveURL(/topic=1&sort=rating/);
   });
+test("expired token (401) is refreshed once without an error page", async ({
+  page,
+}) => {
+  let tokens = 0,
+    rejected = 0;
+  await page.route("**/auth/token/anonymous", (r) =>
+    r.fulfill({
+      json: {
+        token: `anonymous.test.token${++tokens}`,
+        expires_at: Math.floor(Date.now() / 1000) + 900,
+      },
+    }),
+  );
+  await page.route("**/rest/v1/jokes?**", (r) => {
+    if (r.request().headers().authorization?.endsWith("token1")) {
+      rejected++;
+      return r.fulfill({
+        status: 401,
+        headers: { "Access-Control-Allow-Origin": "*" },
+      });
+    }
+    return r.fallback();
+  });
+  await page.goto("/jokes");
+  await expect(page.locator("article")).toHaveCount(20);
+  expect(rejected).toBeGreaterThan(0);
+  expect(tokens).toBe(2);
+});
 test("429 Retry-After pauses retry without automated requests", async ({
   page,
 }) => {
@@ -162,18 +198,31 @@ test("auxiliary taxonomy failure preserves reading and has separate retry", asyn
 test("cancelled stale filter response cannot overwrite newer selection", async ({
   page,
 }) => {
-  let release!: () => void;
+  let release!: () => void,
+    stale = 0,
+    aborted = 0,
+    answered = 0;
   const delay = new Promise<void>((r) => (release = r));
+  const isStale = (url: string) =>
+    new URL(url).searchParams.get("and")?.includes("{1}");
+  page.on("requestfailed", (r) => {
+    if (isStale(r.url())) aborted++;
+  });
   await page.route("**/rest/v1/jokes?**", async (r) => {
-    const url = new URL(r.request().url());
-    if (url.searchParams.get("and")?.includes("{1}")) {
+    if (isStale(r.request().url())) {
+      stale++;
       await delay;
       await r
         .fulfill({
           json: jokes.slice(0, 20),
-          headers: { "Content-Range": "0-19/35" },
+          headers: {
+            "Content-Range": "0-19/35",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Expose-Headers": "Content-Range",
+          },
         })
         .catch(() => {});
+      answered++;
     } else await r.fallback();
   });
   await page.goto("/jokes");
@@ -182,8 +231,13 @@ test("cancelled stale filter response cannot overwrite newer selection", async (
   await page.getByRole("checkbox", { name: "Семья", exact: true }).check();
   await page.getByRole("checkbox", { name: "Работа", exact: true }).uncheck();
   await expect(page.getByText("10 опубликованных анекдотов")).toBeVisible();
+  await expect.poll(() => aborted).toBe(stale);
   release();
+  // Wait until the stale responses were actually delivered, then let React run.
+  await expect.poll(() => answered).toBe(stale);
+  await page.evaluate(() => new Promise((r) => setTimeout(r, 200)));
   await expect(page.locator("article")).toHaveCount(10);
+  await expect(page.getByText("10 опубликованных анекдотов")).toBeVisible();
   await expect(page.locator("article").first()).toHaveAttribute(
     "aria-label",
     "Анекдот №36",
@@ -350,4 +404,26 @@ test("return to results restores reading position and filters do not jump to her
   await page.getByRole("checkbox", { name: "Работа", exact: true }).check();
   await expect(page.getByText("35 опубликованных анекдотов")).toBeVisible();
   expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(100);
+});
+test("next page from the bottom starts at the top of the new list", async ({
+  page,
+}) => {
+  await page.goto("/jokes");
+  await expect(page.locator("article")).toHaveCount(20);
+  const next = page.getByRole("button", { name: "Следующая →" });
+  await next.scrollIntoViewIfNeeded();
+  await next.click();
+  await expect(page.locator("article").first()).toHaveAttribute(
+    "aria-label",
+    "Анекдот №21",
+  );
+  // The results heading is in view: not the bottom, not wherever loading clamped.
+  const heading = page.getByRole("heading", {
+    level: 1,
+    name: "Банк анекдотов категории Б",
+  });
+  await expect
+    .poll(() => heading.evaluate((e) => e.getBoundingClientRect().top))
+    .toBeGreaterThanOrEqual(0);
+  await expect(heading).toBeInViewport();
 });

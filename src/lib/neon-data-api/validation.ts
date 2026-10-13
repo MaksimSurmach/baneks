@@ -1,5 +1,6 @@
 import type { Joke, Term } from "./types";
 import { DataApiError } from "./errors";
+import { kinds, parseId } from "./query";
 function invalid(): never {
   throw new DataApiError("invalid-data");
 }
@@ -9,10 +10,7 @@ function object(value: unknown): Record<string, unknown> {
   return value as Record<string, unknown>;
 }
 export function id(value: unknown): number {
-  const n =
-    typeof value === "string" && /^[1-9]\d*$/.test(value)
-      ? Number(value)
-      : value;
+  const n = typeof value === "string" ? parseId(value) : value;
   if (typeof n !== "number" || !Number.isSafeInteger(n) || n < 1)
     return invalid();
   return n;
@@ -42,7 +40,7 @@ export function joke(value: unknown): Joke {
 export function term(value: unknown): Term {
   const v = object(value);
   if (
-    !["topic", "character", "format"].includes(String(v.kind)) ||
+    !(kinds as string[]).includes(String(v.kind)) ||
     typeof v.name !== "string" ||
     !v.name.trim() ||
     typeof v.slug !== "string" ||
@@ -58,7 +56,15 @@ export function term(value: unknown): Term {
 }
 export function rows<T>(value: unknown, parse: (v: unknown) => T): T[] {
   if (!Array.isArray(value)) return invalid();
-  return value.map(parse);
+  return value.map((row, i) => {
+    try {
+      return parse(row);
+    } catch (e) {
+      // One bad row fails the response; say which one.
+      console.error(`Invalid API row ${i}:`, row);
+      throw e;
+    }
+  });
 }
 export function countFromRange(range: string | null): number | null {
   if (!range) return null;

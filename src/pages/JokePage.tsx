@@ -2,6 +2,8 @@ import { useCallback, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { api } from "../lib/neon-data-api/client";
 import { DataApiError } from "../lib/neon-data-api/errors";
+import { parseId } from "../lib/neon-data-api/query";
+import { useTaxonomy } from "../components/layout/TaxonomyContext";
 import { useRequest } from "../lib/useRequest";
 import { JokeTags, Rating } from "../components/catalog/JokeRow";
 import Loading from "../components/feedback/Loading";
@@ -11,12 +13,13 @@ export default function JokePage() {
   const { id } = useParams(),
     location = useLocation(),
     navigate = useNavigate(),
+    taxonomy = useTaxonomy(),
     [feedback, setFeedback] = useState("");
   const load = useCallback(
     (signal: AbortSignal) => {
-      if (!id || !/^[1-9]\d*$/.test(id) || !Number.isSafeInteger(Number(id)))
-        return Promise.reject(new DataApiError("bad-request", 400));
-      return api.getJoke(Number(id), signal);
+      const jokeId = parseId(id ?? "");
+      if (!jokeId) return Promise.reject(new DataApiError("bad-request", 400));
+      return api.getJoke(jokeId, signal);
     },
     [id],
   );
@@ -67,6 +70,9 @@ export default function JokePage() {
           <article className={styles.text}>{data.value.body}</article>
           <div className="tags">
             <JokeTags joke={data.value} />
+            {taxonomy.status === "error" && (
+              <span>Рубрики пока недоступны</span>
+            )}
           </div>
           <p className={styles.provenance}>
             Темы и персонажи предложены ИИ. Разметка предварительная.

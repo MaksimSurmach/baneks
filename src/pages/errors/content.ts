@@ -1,4 +1,4 @@
-import type { ErrorKind } from "../../lib/neon-data-api/errors";
+import { statusKinds, type ErrorKind } from "../../lib/neon-data-api/errors";
 export const errorContent: Record<
   ErrorKind,
   { code: string; title: string; description: string; hint: string }
@@ -63,18 +63,21 @@ export const errorContent: Record<
     description: "Сервис вернул данные, которые пока не удаётся открыть.",
     hint: "Повторите запрос. Если ошибка остаётся, вернитесь к каталогу позже.",
   },
+  config: {
+    code: "Настройка",
+    title: "Каталог не настроен",
+    description: "В этой сборке не указан адрес сервиса данных.",
+    hint: "Это ошибка публикации сайта, а не ваших действий. Мы уже должны о ней знать.",
+  },
+  app: {
+    code: "Приложение",
+    title: "Страница не открылась",
+    description: "Из-за ошибки в приложении эту страницу не удалось показать.",
+    hint: "Повторите или обновите страницу. Архив и ваши фильтры не пострадали.",
+  },
 };
 export const routeKinds: Record<string, ErrorKind> = {
-  "400": "bad-request",
-  "401": "forbidden",
-  "403": "forbidden",
-  "404": "not-found",
-  "408": "timeout",
-  "429": "rate-limit",
-  "500": "server",
-  "502": "unavailable",
-  "503": "unavailable",
-  "504": "unavailable",
+  ...statusKinds,
   timeout: "timeout",
   offline: "offline",
   connection: "network",

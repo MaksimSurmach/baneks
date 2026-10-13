@@ -1,11 +1,12 @@
 import { useLayoutEffect, useRef } from "react";
 // Restore after async content grows. No injected inline script, so CSP stays strict.
-export function useScrollRestoration(key: string) {
+// `startY` (from history state) overrides keeping the position on same-path changes.
+export function useScrollRestoration(key: string, startY?: number) {
   const previousPath = useRef<string | undefined>(undefined);
   useLayoutEffect(() => {
     const storageKey = "baneks-scroll:" + key,
       path = key.split("?")[0];
-    let saved = previousPath.current === path ? window.scrollY : 0;
+    let saved = startY ?? (previousPath.current === path ? window.scrollY : 0);
     previousPath.current = path;
     try {
       const stored = sessionStorage.getItem(storageKey);
@@ -54,5 +55,5 @@ export function useScrollRestoration(key: string) {
       window.removeEventListener("scroll", track);
       window.removeEventListener("pagehide", save);
     };
-  }, [key]);
+  }, [key, startY]);
 }

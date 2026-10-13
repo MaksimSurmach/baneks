@@ -12,7 +12,9 @@ const browser = await chromium.launch({
     : undefined,
 });
 const page = await browser.newPage();
-await page.goto("http://localhost:4173/atlas");
+// Fetches run from a real page so CORS is exercised; start a server first
+// (`npm run preview -- --port 4173`).
+await page.goto(`${process.env.PROBE_ORIGIN || "http://localhost:4173"}/atlas`);
 const results = await page.evaluate(
   async ({ base, auth, hidden }) => {
     const tr = await fetch(auth + "/token/anonymous", { credentials: "omit" });
@@ -72,9 +74,10 @@ const results = await page.evaluate(
   },
   { base, auth, hidden: process.env.NEON_HIDDEN_TEST_ID || "" },
 );
-await fs.mkdir("../work", { recursive: true });
+const hidden = results.find((r) => r.name === "hidden");
+if (hidden && hidden.rows?.length !== 0) hidden.ok = false;
 await fs.writeFile(
-  "../work/neon-browser-probe.json",
+  new URL("../docs/qa/neon-browser-probe.json", import.meta.url),
   JSON.stringify(
     { origin: new URL(page.url()).origin, anonymousToken: true, results },
     null,

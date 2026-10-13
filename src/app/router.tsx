@@ -19,7 +19,7 @@ export const router = createBrowserRouter([
     element: <App />,
     errorElement: (
       <div className="simple">
-        <ErrorPage error={new DataApiError("server", 500)} />
+        <ErrorPage error={new DataApiError("app")} />
       </div>
     ),
     children: [

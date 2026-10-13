@@ -5,7 +5,7 @@ import { afterEach, expect, test, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import RenderBoundary from "./RenderBoundary";
 afterEach(cleanup);
-test("render failure shows safe 500 and Retry restores content", () => {
+test("render failure shows safe app error and Retry restores content", () => {
   vi.spyOn(console, "error").mockImplementation(() => {});
   let broken = true;
   function Reader(): ReactNode {
@@ -20,7 +20,7 @@ test("render failure shows safe 500 and Retry restores content", () => {
     </MemoryRouter>,
   );
   expect(
-    screen.getByRole("heading", { name: "Не удалось загрузить данные" }),
+    screen.getByRole("heading", { name: "Страница не открылась" }),
   ).toBeTruthy();
   expect(screen.queryByText("postgresql://private-password")).toBeNull();
   broken = false;

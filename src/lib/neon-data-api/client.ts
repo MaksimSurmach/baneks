@@ -1,11 +1,19 @@
 import { createAnonymousTokenProvider } from "./anonymous-token";
 import type { Joke, Term } from "./types";
-import { DataApiError, httpError, normalizeError } from "./errors";
+import {
+  DataApiError,
+  REQUEST_TIMEOUT,
+  cancelled,
+  httpError,
+  networkError,
+} from "./errors";
 import { joke, term, rows, countFromRange } from "./validation";
 import {
   applyFilters,
   buildQuery,
   validId,
+  MAX_ROWS,
+  PAGE_SIZE,
   type CatalogQuery,
   type Filters,
 } from "./query";
@@ -14,13 +22,17 @@ export type JokePage = {
   total: number | null;
   hasMore: boolean;
 };
-export const REQUEST_TIMEOUT = 12000;
+export { REQUEST_TIMEOUT };
+// Taxonomy is small (84 terms today); the cap only stops a runaway pagination loop.
+const MAX_TERMS = 10000;
+// Exclusions travel in the URL as not.in.(...); a short history is enough.
+const MAX_EXCLUSIONS = 16;
 export function createClient(
   baseUrl: string,
   options: {
     timeout?: number;
     fetch?: typeof fetch;
-    getToken?: (signal: AbortSignal) => Promise<string>;
+    getToken?: (signal: AbortSignal, refresh?: boolean) => Promise<string>;
   } = {},
 ) {
   const fetcher = options.fetch ?? fetch;
@@ -29,10 +41,15 @@ export function createClient(
     path: string,
     params: URLSearchParams,
     signal?: AbortSignal,
+    count = false,
   ) {
-    if (!/^https?:\/\//.test(baseUrl) || baseUrl.includes("@"))
-      throw new DataApiError("invalid-data");
-    if (signal?.aborted) throw new DOMException("Cancelled", "AbortError");
+    if (!/^https?:\/\//.test(baseUrl) || baseUrl.includes("@")) {
+      console.error(
+        "VITE_NEON_DATA_API_URL is missing or is not an http(s) URL",
+      );
+      throw new DataApiError("config");
+    }
+    if (signal?.aborted) throw cancelled();
     const controller = new AbortController();
     let timedOut = false;
     const abort = () => controller.abort();
@@ -42,22 +59,26 @@ export function createClient(
       controller.abort();
     }, options.timeout ?? REQUEST_TIMEOUT);
     try {
-      const token = await options.getToken?.(controller.signal);
-      if (controller.signal.aborted)
-        throw new DOMException("Cancelled", "AbortError");
-      const response = await fetcher(
-        `${baseUrl.replace(/\/$/, "")}/${path}?${params}`,
-        {
-          method: "GET",
-          credentials: "omit",
-          headers: {
-            Accept: "application/json",
-            Prefer: "count=exact",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      let response: Response;
+      for (let attempt = 0; ; attempt++) {
+        const token = await options.getToken?.(controller.signal, attempt > 0);
+        if (controller.signal.aborted) throw cancelled();
+        response = await fetcher(
+          `${baseUrl.replace(/\/$/, "")}/${path}?${params}`,
+          {
+            method: "GET",
+            credentials: "omit",
+            headers: {
+              Accept: "application/json",
+              ...(count ? { Prefer: "count=exact" } : {}),
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            signal: controller.signal,
           },
-          signal: controller.signal,
-        },
-      );
+        );
+        // An expired or rotated token gets one fresh token, not a 403 page.
+        if (response.status !== 401 || !token || attempt > 0) break;
+      }
       if (!response.ok) {
         throw httpError(response.status, response.headers.get("Retry-After"));
       }
@@ -72,9 +93,11 @@ export function createClient(
         total: countFromRange(response.headers.get("Content-Range")),
       };
     } catch (e) {
-      if (signal?.aborted) throw new DOMException("Cancelled", "AbortError");
+      if (signal?.aborted) throw cancelled();
       if (timedOut) throw new DataApiError("timeout", 408);
-      throw normalizeError(e);
+      if (e instanceof DataApiError) throw e;
+      // Only fetch itself throws anything else here: the network failed.
+      throw networkError();
     } finally {
       clearTimeout(timer);
       signal?.removeEventListener("abort", abort);
@@ -84,16 +107,26 @@ export function createClient(
     q: CatalogQuery,
     signal?: AbortSignal,
   ): Promise<JokePage> {
-    const result = await request("jokes", buildQuery(q), signal);
+    let result;
+    try {
+      result = await request("jokes", buildQuery(q), signal, true);
+    } catch (e) {
+      // PostgREST answers 416 to an offset past the end when counting:
+      // a stale ?page= link is an empty page, not a bad request.
+      if (e instanceof DataApiError && e.status === 416)
+        return { jokes: [], total: null, hasMore: false };
+      throw e;
+    }
     const parsed = rows(result.data, joke),
-      size = q.size ?? 20;
+      size = q.size ?? PAGE_SIZE;
     return {
       jokes: parsed.slice(0, size),
       total: result.total,
       hasMore:
         result.total !== null
           ? q.page * size < result.total
-          : parsed.length > size || (size === 100 && parsed.length === 100),
+          : parsed.length > size ||
+            (size === MAX_ROWS && parsed.length === MAX_ROWS),
     };
   }
   async function getJoke(jokeId: number, signal?: AbortSignal) {
@@ -115,20 +148,20 @@ export function createClient(
   async function listTerms(signal?: AbortSignal) {
     if (cachedTerms) return cachedTerms;
     const result: Term[] = [];
-    for (let offset = 0; offset < 10000; offset += 100) {
+    for (let offset = 0; offset < MAX_TERMS; offset += MAX_ROWS) {
       const r = await request(
         "terms",
         new URLSearchParams({
           select: "id,kind,name,slug",
           order: "id.asc",
-          limit: "100",
+          limit: String(MAX_ROWS),
           offset: String(offset),
         }),
         signal,
       );
       const page = rows(r.data, term);
       result.push(...page);
-      if (page.length < 100 || (r.total !== null && result.length >= r.total)) {
+      if (page.length < MAX_ROWS) {
         cachedTerms = result;
         return result;
       }
@@ -140,7 +173,10 @@ export function createClient(
     exclusions: number[] = [],
     signal?: AbortSignal,
   ): Promise<Joke> {
-    if (exclusions.length > 16 || exclusions.some((v) => !validId(v)))
+    if (
+      exclusions.length > MAX_EXCLUSIONS ||
+      exclusions.some((v) => !validId(v))
+    )
       throw new DataApiError("bad-request", 400);
     const p = new URLSearchParams({
       select: "id,body,language,catalog_rating,term_ids",
@@ -149,11 +185,11 @@ export function createClient(
     });
     applyFilters(p, filters);
     if (exclusions.length) p.set("id", `not.in.(${exclusions.join(",")})`);
-    let r = await request("jokes", p, signal);
+    let r = await request("jokes", p, signal, true);
     rows(r.data, joke);
     if (r.total === 0 && exclusions.length) {
       p.delete("id");
-      r = await request("jokes", p, signal);
+      r = await request("jokes", p, signal, true);
       rows(r.data, joke);
     }
     if (r.total === null) throw new DataApiError("invalid-data");

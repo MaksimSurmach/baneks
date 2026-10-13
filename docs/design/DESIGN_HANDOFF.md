@@ -1,5 +1,7 @@
 # Банк анекдотов категории Б — catalog design handoff
 
+> **Historical.** Search, SSR/Workers and the server API described here were superseded by the static V1; see [IMPLEMENTATION_NOTES.md](IMPLEMENTATION_NOTES.md).
+
 **Status:** SELECTED VISUAL DIRECTION / implementation reference; **not** a pixel-perfect UI specification or approved full design system.
 **Date:** 2026-10-11.
 **Product:** RANUS — Jokes & Search, public catalog + separate interactive Atlas.

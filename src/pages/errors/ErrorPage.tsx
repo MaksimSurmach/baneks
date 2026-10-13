@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import type { DataApiError } from "../../lib/neon-data-api/errors";
+import { retryable, type DataApiError } from "../../lib/neon-data-api/errors";
 import { errorContent } from "./content";
 import styles from "./ErrorPage.module.css";
 export default function ErrorPage({
@@ -33,13 +33,15 @@ export default function ErrorPage({
       <p className={styles.description}>{content.description}</p>
       <p className={styles.hint}>{content.hint}</p>
       <div className="actions">
-        <button
-          className="primary"
-          disabled={seconds > 0}
-          onClick={retry ?? (() => navigate("/jokes", { replace: true }))}
-        >
-          Повторить
-        </button>
+        {retryable(error.kind) && (
+          <button
+            className="primary"
+            disabled={seconds > 0}
+            onClick={retry ?? (() => navigate("/jokes", { replace: true }))}
+          >
+            Повторить
+          </button>
+        )}
         <Link to="/jokes">В каталог</Link>
         <button onClick={back}>Назад</button>
         {(reset || error.kind === "bad-request") && (

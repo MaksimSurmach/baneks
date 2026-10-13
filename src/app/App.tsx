@@ -11,7 +11,10 @@ export default function App() {
     location = useLocation(),
     main = useRef<HTMLElement>(null);
   const [broken, setBroken] = useState(false);
-  useScrollRestoration(location.pathname + location.search);
+  useScrollRestoration(
+    location.pathname + location.search,
+    (location.state as { scrollY?: number } | null)?.scrollY,
+  );
   useEffect(() => {
     const frame = requestAnimationFrame(() =>
       main.current?.focus({ preventScroll: true }),

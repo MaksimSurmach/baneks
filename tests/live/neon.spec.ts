@@ -1,4 +1,9 @@
+import { readFileSync } from "node:fs";
 import { test, expect } from "@playwright/test";
+// The policy Cloudflare Pages will actually serve.
+const csp = /Content-Security-Policy: (.+)/.exec(
+  readFileSync(new URL("../../public/_headers", import.meta.url), "utf8"),
+)![1];
 test("production bundle reads live Neon, filters, rating, random and hidden ID", async ({
   page,
 }, info) => {
@@ -70,8 +75,7 @@ test("production bundle remains functional under shipped CSP and deep-link HTTP 
       response,
       headers: {
         ...response.headers(),
-        "Content-Security-Policy":
-          "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://*.neon.tech; frame-ancestors 'none'; base-uri 'self'; object-src 'none'",
+        "Content-Security-Policy": csp,
       },
     });
   });
@@ -89,5 +93,8 @@ test("production bundle remains functional under shipped CSP and deep-link HTTP 
   await expect(
     page.getByRole("heading", { name: "Не удалось загрузить данные" }),
   ).toBeVisible();
+  // Lazy chunk under the same CSP.
+  await page.goto("/atlas");
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   expect(violations).toEqual([]);
 });

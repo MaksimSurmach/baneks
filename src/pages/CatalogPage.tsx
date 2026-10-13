@@ -7,6 +7,7 @@ import {
   readQuery,
   writeQuery,
   kinds,
+  PAGE_SIZE,
   type CatalogQuery,
 } from "../lib/neon-data-api/query";
 import { useRequest } from "../lib/useRequest";
@@ -21,7 +22,8 @@ export default function CatalogPage() {
     location = useLocation(),
     navigate = useNavigate(),
     taxonomy = useTaxonomy(),
-    drawer = useRef<HTMLDialogElement>(null);
+    drawer = useRef<HTMLDialogElement>(null),
+    results = useRef<HTMLDivElement>(null);
   let query: CatalogQuery = { page: 1, sort: "id", filters: {} };
   try {
     query = readQuery(params);
@@ -46,6 +48,16 @@ export default function CatalogPage() {
   function change(q: CatalogQuery) {
     setParams(writeQuery(q), { preventScrollReset: true, flushSync: true });
   }
+  // Filters keep the reading position; a new page starts at the top of the list.
+  function goToPage(page: number) {
+    const top = results.current
+      ? results.current.getBoundingClientRect().top + window.scrollY
+      : 0;
+    setParams(writeQuery({ ...query, page }), {
+      flushSync: true,
+      state: { scrollY: Math.min(window.scrollY, top) },
+    });
+  }
   function reset() {
     setParams(new URLSearchParams(), {
       preventScrollReset: true,
@@ -54,14 +66,14 @@ export default function CatalogPage() {
   }
   const totalPages =
     data.status === "success" && data.value.total !== null
-      ? Math.ceil(data.value.total / 20)
+      ? Math.ceil(data.value.total / PAGE_SIZE)
       : null;
   return (
     <div className={styles.layout}>
       <aside className={styles.sidebar} aria-label="Фильтры каталога">
         <Filters query={query} change={change} />
       </aside>
-      <div className={styles.results}>
+      <div className={styles.results} ref={results}>
         <h1>Банк анекдотов категории Б</h1>
         <p className={styles.intro}>Сначала история. Всё остальное — потом.</p>
         <div className={styles.search}>
@@ -186,7 +198,7 @@ export default function CatalogPage() {
               </p>
               <div className="actions">
                 {query.page > 1 && (
-                  <button onClick={() => change({ ...query, page: 1 })}>
+                  <button onClick={() => goToPage(1)}>
                     На первую страницу
                   </button>
                 )}
@@ -205,7 +217,7 @@ export default function CatalogPage() {
               <nav className={styles.pagination} aria-label="Страницы каталога">
                 <button
                   disabled={query.page === 1}
-                  onClick={() => change({ ...query, page: query.page - 1 })}
+                  onClick={() => goToPage(query.page - 1)}
                 >
                   ← Предыдущая
                 </button>
@@ -231,7 +243,7 @@ export default function CatalogPage() {
                       <button
                         aria-current={n === query.page ? "page" : undefined}
                         aria-label={`Страница ${n}`}
-                        onClick={() => change({ ...query, page: n })}
+                        onClick={() => goToPage(n)}
                       >
                         {n}
                       </button>
@@ -240,7 +252,7 @@ export default function CatalogPage() {
                 </div>
                 <button
                   disabled={!data.value.hasMore}
-                  onClick={() => change({ ...query, page: query.page + 1 })}
+                  onClick={() => goToPage(query.page + 1)}
                 >
                   Следующая →
                 </button>
