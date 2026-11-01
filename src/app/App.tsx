@@ -30,7 +30,7 @@ export default function App() {
         <picture>
           <img
             className={styles.art}
-            src="/assets/hero-wide.webp"
+            src={`${import.meta.env.BASE_URL}assets/hero-wide.webp`}
             alt="Иллюстрированная панорама: герои анекдотов за длинным столом на фоне старого города"
             fetchPriority="high"
             onError={() => setBroken(true)}

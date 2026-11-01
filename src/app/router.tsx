@@ -14,43 +14,46 @@ const fallback = (
     <ErrorPage error={new DataApiError("not-found", 404)} />
   </div>
 );
-export const router = createBrowserRouter([
-  {
-    element: <App />,
-    errorElement: (
-      <div className="simple">
-        <ErrorPage error={new DataApiError("app")} />
-      </div>
-    ),
-    children: [
-      { path: "/", element: <Navigate to="/jokes" replace /> },
-      { path: "/jokes", element: <CatalogPage /> },
-      { path: "/jokes/random", element: <RandomPage /> },
-      { path: "/jokes/:id", element: <JokePage /> },
-      { path: "/topics/:kind/:slug", element: <TopicPage /> },
-      {
-        path: "/atlas",
-        element: (
-          <Suspense
-            fallback={
-              <div className="simple" role="status">
-                Загрузка…
-              </div>
-            }
-          >
-            <Atlas />
-          </Suspense>
-        ),
-      },
-      ...Object.entries(routeKinds).map(([path, kind]) => ({
-        path: "/" + path,
-        element: (
-          <div className="simple">
-            <ErrorPage error={new DataApiError(kind)} />
-          </div>
-        ),
-      })),
-      { path: "*", element: fallback },
-    ],
-  },
-]);
+export const router = createBrowserRouter(
+  [
+    {
+      element: <App />,
+      errorElement: (
+        <div className="simple">
+          <ErrorPage error={new DataApiError("app")} />
+        </div>
+      ),
+      children: [
+        { path: "/", element: <Navigate to="/jokes" replace /> },
+        { path: "/jokes", element: <CatalogPage /> },
+        { path: "/jokes/random", element: <RandomPage /> },
+        { path: "/jokes/:id", element: <JokePage /> },
+        { path: "/topics/:kind/:slug", element: <TopicPage /> },
+        {
+          path: "/atlas",
+          element: (
+            <Suspense
+              fallback={
+                <div className="simple" role="status">
+                  Загрузка…
+                </div>
+              }
+            >
+              <Atlas />
+            </Suspense>
+          ),
+        },
+        ...Object.entries(routeKinds).map(([path, kind]) => ({
+          path: "/" + path,
+          element: (
+            <div className="simple">
+              <ErrorPage error={new DataApiError(kind)} />
+            </div>
+          ),
+        })),
+        { path: "*", element: fallback },
+      ],
+    },
+  ],
+  { basename: import.meta.env.BASE_URL },
+);

@@ -3,6 +3,7 @@ on:
   push:
     branches: [master]
   pull_request:
+  workflow_dispatch:
 env:
   VITE_NEON_DATA_API_URL: https://ep-proud-sound-baou4sxl.apirest.c-8.eu-central-1.aws.neon.tech/banksDB/rest/v1
   VITE_NEON_AUTH_URL: https://ep-proud-sound-baou4sxl.neonauth.c-8.eu-central-1.aws.neon.tech/banksDB/auth
@@ -24,6 +25,15 @@ jobs:
       # Real Neon reads: skipped for fork PRs.
       - run: npm run test:live
         if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+      - run: npm run build:pages
+      - run: npm run test:live
+        env:
+          LIVE_BASE_PATH: /baneks/
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+      - uses: actions/upload-pages-artifact@v4
+        if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
+        with:
+          path: dist
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -32,3 +42,41 @@ jobs:
             playwright-report/
             test-results/
             live-test-results/
+  deploy:
+    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
+    needs: check
+    runs-on: ubuntu-latest
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+      - uses: actions/deploy-pages@v4
+        id: deployment
+  deployed-smoke:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:live
+        env:
+          LIVE_URL: ${{ needs.deploy.outputs.page_url }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: deployed-browser-evidence
+          path: live-test-results/

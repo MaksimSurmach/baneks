@@ -1,6 +1,8 @@
 # Банк анекдотов категории Б
 
-Готовый frontend V1: React + TypeScript + Vite + React Router, статический Cloudflare Pages. Браузер напрямую читает настоящие опубликованные анекдоты из Neon Data API. Панорама и шрифты включены в сборку. Backend, Worker, регистрация, аккаунты и поиск не реализуются; Атлас — оформленная страница «в разработке».
+Frontend V1: React + TypeScript + Vite + React Router, статический GitHub Pages с деплоем через GitHub Actions. Браузер напрямую читает настоящие опубликованные анекдоты из Neon Data API. Панорама и шрифты включены в сборку. Backend, Worker, регистрация, аккаунты и поиск не реализуются; Атлас — оформленная страница «в разработке».
+
+Сайт: https://maksimsurmach.github.io/baneks/
 
 ## Запуск
 
@@ -63,7 +65,27 @@ Quiet Archive: исходная самостоятельная иллюстра�
 
 `tests/live/neon.spec.ts` проверяет production bundle: каталог → фильтр → page2 → reload → rating → random → next → скрытый ID, плюс 1440/768/390. Второй тест применяет CSP из `public/_headers` к production bundle. Отказы моделируются только через Playwright interception. Скриншоты сохраняются как артефакты CI (`browser-evidence`).
 
-## Cloudflare Pages и rollback
+## GitHub Pages и GitHub Actions
+
+Settings → Pages → Source: **GitHub Actions**. Workflow `frontend` проверяет каждый PR; после push в `master` публикует только прошедшую проверки сборку и запускает браузерный smoke на опубликованном URL. Ручной перезапуск — Actions → frontend → Run workflow → `master`.
+
+`npm run build:pages` собирает приложение с base `/baneks/`, добавляет CSP в HTML (Pages не поддерживает Cloudflare `_headers`) и копирует SPA в `404.html`. Router и панорама используют тот же base. Никаких секретов для деплоя не нужно: используются `GITHUB_TOKEN`/OIDC и два публичных Neon URL из workflow. База остаётся в Neon, на GitHub хранятся только статические файлы.
+
+**Ограничение Pages:** прямой переход или refresh `/baneks/jokes/1` загружает приложение через `404.html` и работает, но HTTP-статус документа — **404**. Переходы внутри приложения не перезагружают документ. Это ограничивает SEO/предпросмотр ссылок. CSP из meta не поддерживает `frame-ancestors`; `_headers` и `_redirects` здесь не применяются. Для HTTP 200 на всех SPA-маршрутах и полных security headers можно позже перенести тот же `dist` на Cloudflare Pages или другой хостинг с rewrites.
+
+Проверка локальной Pages-сборки и опубликованного сайта:
+
+```sh
+npm run build:pages
+LIVE_BASE_PATH=/baneks/ npm run test:live
+LIVE_URL=https://maksimsurmach.github.io/baneks/ npm run test:live
+```
+
+Live-тесты читают настоящие данные: каталог → фильтр → page2 → refresh → rating → random → next → hidden ID; дополнительно проверяют панораму, шрифты, CSP, прямую ссылку и lazy chunk. Скриншоты и трассы публикуются в artifacts `browser-evidence` и `deployed-browser-evidence`.
+
+Rollback: revert проблемного коммита в `master`; workflow проверит и опубликует предыдущий код. Повтор старого workflow без revert не меняет `master`, следующий push снова опубликует текущую версию.
+
+## Альтернатива: Cloudflare Pages и rollback
 
 1. Workers & Pages → Create → Pages → Connect to Git → `MaksimSurmach/baneks`. Дать GitHub доступ только к этому репозиторию.
 2. Production branch `master`; root `/`; build `npm run build`; output `dist`; Node `24`.
@@ -73,4 +95,4 @@ Quiet Archive: исходная самостоятельная иллюстра�
 6. На фактическом preview повторить live smoke и открыть `/jokes/1`, refresh, unknown route, `/500`. Проверить `curl -I`: SPA-страница ошибки обычно имеет HTTP **200**, а не динамический 400/500. Local preview подтверждает bundle/fallback, но не реальное поведение Cloudflare.
 7. Rollback: Pages → Deployments → известный рабочий production deploy → Rollback. Согласовать env API с выбранной версией.
 
-Cloudflare credentials в окружении отсутствуют, поэтому **публичный deploy URL не заявляется**. Остались GitHub→Pages connection, preview origin/CORS и фактическая проверка Pages HTTP fallback. Фронтенд уже запускается локально на живом Neon.
+Cloudflare не настроен и не используется текущим workflow. Для его подключения нужны доступ к аккаунту, GitHub→Pages connection и проверка preview origin/CORS и HTTP fallback.
