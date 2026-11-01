@@ -1,0 +1,684 @@
+{
+  "origin": "http://localhost:4173",
+  "anonymousToken": true,
+  "results": [
+    {
+      "name": "jokes",
+      "status": 206,
+      "ok": true,
+      "corsReadable": true,
+      "count": "0-2/40225",
+      "rows": [
+        {
+          "id": 1,
+          "body": "Молдавское колесо обозрения за один оборот делает 3 замеса бетона",
+          "language": "ru",
+          "catalog_rating": 4.4404016,
+          "term_ids": [
+            16,
+            80
+          ]
+        },
+        {
+          "id": 2,
+          "body": "Парень с девушкой лежат на кровати, и всё движется к сексу. Снимает с неё трусы, а она закрывает всё руками и говорит:\n— У меня там хуй...\nПарень убирает руки, видит, что ничего там нет, и говорит:\n— Нет тут хуя.\nА девушка ему:\n— НУ ТАК СДЕЛАЙ ЖЕ ЧТО-НИБУДЬ!",
+          "language": "ru",
+          "catalog_rating": 2.001828,
+          "term_ids": [
+            8,
+            81
+          ]
+        },
+        {
+          "id": 3,
+          "body": "Эксгибиционист случайно оказался на нудистском пляже и потерял смысл жизни.",
+          "language": "ru",
+          "catalog_rating": 3.7288512,
+          "term_ids": [
+            8,
+            80
+          ]
+        }
+      ],
+      "errorCategory": null
+    },
+    {
+      "name": "terms",
+      "status": 200,
+      "ok": true,
+      "corsReadable": true,
+      "count": "0-83/84",
+      "rows": [
+        {
+          "id": 1,
+          "kind": "topic",
+          "name": "семья",
+          "slug": "family"
+        },
+        {
+          "id": 2,
+          "kind": "topic",
+          "name": "отношения и знакомства",
+          "slug": "relationships"
+        },
+        {
+          "id": 3,
+          "kind": "topic",
+          "name": "дети",
+          "slug": "children"
+        },
+        {
+          "id": 4,
+          "kind": "topic",
+          "name": "школа и образование",
+          "slug": "school"
+        },
+        {
+          "id": 5,
+          "kind": "topic",
+          "name": "работа и карьера",
+          "slug": "work"
+        },
+        {
+          "id": 6,
+          "kind": "topic",
+          "name": "деньги и экономика",
+          "slug": "money"
+        },
+        {
+          "id": 7,
+          "kind": "topic",
+          "name": "медицина и здоровье",
+          "slug": "health"
+        },
+        {
+          "id": 8,
+          "kind": "topic",
+          "name": "секс и интимная жизнь",
+          "slug": "sex"
+        },
+        {
+          "id": 9,
+          "kind": "topic",
+          "name": "алкоголь",
+          "slug": "alcohol"
+        },
+        {
+          "id": 10,
+          "kind": "topic",
+          "name": "наркотики",
+          "slug": "drugs"
+        },
+        {
+          "id": 11,
+          "kind": "topic",
+          "name": "преступление и тюрьма",
+          "slug": "crime"
+        },
+        {
+          "id": 12,
+          "kind": "topic",
+          "name": "полиция и расследования",
+          "slug": "police"
+        },
+        {
+          "id": 13,
+          "kind": "topic",
+          "name": "суд и право",
+          "slug": "law"
+        },
+        {
+          "id": 14,
+          "kind": "topic",
+          "name": "армия и война",
+          "slug": "military"
+        },
+        {
+          "id": 15,
+          "kind": "topic",
+          "name": "политика и власть",
+          "slug": "politics"
+        },
+        {
+          "id": 16,
+          "kind": "topic",
+          "name": "национальность и этнические стереотипы",
+          "slug": "ethnicity"
+        },
+        {
+          "id": 17,
+          "kind": "topic",
+          "name": "религия",
+          "slug": "religion"
+        },
+        {
+          "id": 18,
+          "kind": "topic",
+          "name": "смерть и загробная жизнь",
+          "slug": "death_afterlife"
+        },
+        {
+          "id": 19,
+          "kind": "topic",
+          "name": "животные",
+          "slug": "animals"
+        },
+        {
+          "id": 20,
+          "kind": "topic",
+          "name": "еда и напитки",
+          "slug": "food"
+        },
+        {
+          "id": 21,
+          "kind": "topic",
+          "name": "торговля и услуги",
+          "slug": "commerce"
+        },
+        {
+          "id": 22,
+          "kind": "topic",
+          "name": "транспорт и дороги",
+          "slug": "transport"
+        },
+        {
+          "id": 23,
+          "kind": "topic",
+          "name": "городская жизнь",
+          "slug": "city"
+        },
+        {
+          "id": 24,
+          "kind": "topic",
+          "name": "деревня и сельская жизнь",
+          "slug": "village"
+        },
+        {
+          "id": 25,
+          "kind": "topic",
+          "name": "технологии и интернет",
+          "slug": "technology"
+        },
+        {
+          "id": 26,
+          "kind": "topic",
+          "name": "искусство и культура",
+          "slug": "arts"
+        },
+        {
+          "id": 27,
+          "kind": "topic",
+          "name": "музыка",
+          "slug": "music"
+        },
+        {
+          "id": 28,
+          "kind": "topic",
+          "name": "литература",
+          "slug": "literature"
+        },
+        {
+          "id": 29,
+          "kind": "topic",
+          "name": "кино и телевидение",
+          "slug": "film_tv"
+        },
+        {
+          "id": 30,
+          "kind": "topic",
+          "name": "спорт",
+          "slug": "sports"
+        },
+        {
+          "id": 31,
+          "kind": "topic",
+          "name": "путешествия и отдых",
+          "slug": "travel"
+        },
+        {
+          "id": 32,
+          "kind": "topic",
+          "name": "природа и погода",
+          "slug": "nature"
+        },
+        {
+          "id": 33,
+          "kind": "topic",
+          "name": "быт и жильё",
+          "slug": "home"
+        },
+        {
+          "id": 34,
+          "kind": "topic",
+          "name": "внешность, возраст и гендер",
+          "slug": "appearance"
+        },
+        {
+          "id": 35,
+          "kind": "topic",
+          "name": "дружба и общение",
+          "slug": "friendship"
+        },
+        {
+          "id": 36,
+          "kind": "topic",
+          "name": "обман и розыгрыши",
+          "slug": "deception"
+        },
+        {
+          "id": 37,
+          "kind": "topic",
+          "name": "бюрократия и учреждения",
+          "slug": "bureaucracy"
+        },
+        {
+          "id": 38,
+          "kind": "topic",
+          "name": "азартные игры",
+          "slug": "gambling"
+        },
+        {
+          "id": 39,
+          "kind": "topic",
+          "name": "аварии и несчастные случаи",
+          "slug": "accidents"
+        },
+        {
+          "id": 40,
+          "kind": "topic",
+          "name": "мистика и фантастика",
+          "slug": "fantasy"
+        },
+        {
+          "id": 41,
+          "kind": "topic",
+          "name": "язык и речевые ситуации",
+          "slug": "language"
+        },
+        {
+          "id": 42,
+          "kind": "topic",
+          "name": "знаменитости и публичная жизнь",
+          "slug": "celebrity"
+        },
+        {
+          "id": 43,
+          "kind": "topic",
+          "name": "общественные кризисы",
+          "slug": "war_crisis"
+        },
+        {
+          "id": 44,
+          "kind": "topic",
+          "name": "игры и соревнования",
+          "slug": "gambling_games"
+        },
+        {
+          "id": 45,
+          "kind": "topic",
+          "name": "другая конкретная тема",
+          "slug": "other"
+        },
+        {
+          "id": 46,
+          "kind": "character",
+          "name": "Вовочка",
+          "slug": "vovochka"
+        },
+        {
+          "id": 47,
+          "kind": "character",
+          "name": "Штирлиц",
+          "slug": "shtirlitz"
+        },
+        {
+          "id": 48,
+          "kind": "character",
+          "name": "Мюллер",
+          "slug": "mueller"
+        },
+        {
+          "id": 49,
+          "kind": "character",
+          "name": "Петька",
+          "slug": "petka"
+        },
+        {
+          "id": 50,
+          "kind": "character",
+          "name": "Василий Иванович Чапаев",
+          "slug": "chapaev"
+        },
+        {
+          "id": 51,
+          "kind": "character",
+          "name": "Поручик Ржевский",
+          "slug": "rzhevsky"
+        },
+        {
+          "id": 52,
+          "kind": "character",
+          "name": "Рабинович",
+          "slug": "rabinovich"
+        },
+        {
+          "id": 53,
+          "kind": "character",
+          "name": "Абрам",
+          "slug": "abram"
+        },
+        {
+          "id": 54,
+          "kind": "character",
+          "name": "Хаим",
+          "slug": "haim"
+        },
+        {
+          "id": 55,
+          "kind": "character",
+          "name": "Изя",
+          "slug": "izya"
+        },
+        {
+          "id": 56,
+          "kind": "character",
+          "name": "Фима",
+          "slug": "fima"
+        },
+        {
+          "id": 57,
+          "kind": "character",
+          "name": "Чукча",
+          "slug": "chukcha"
+        },
+        {
+          "id": 58,
+          "kind": "character",
+          "name": "Чебурашка",
+          "slug": "cheburashka"
+        },
+        {
+          "id": 59,
+          "kind": "character",
+          "name": "Крокодил Гена",
+          "slug": "crocodile_gena"
+        },
+        {
+          "id": 60,
+          "kind": "character",
+          "name": "Карлсон",
+          "slug": "karlson"
+        },
+        {
+          "id": 61,
+          "kind": "character",
+          "name": "Шерлок Холмс",
+          "slug": "sherlock_holmes"
+        },
+        {
+          "id": 62,
+          "kind": "character",
+          "name": "Доктор Ватсон",
+          "slug": "dr_watson"
+        },
+        {
+          "id": 63,
+          "kind": "character",
+          "name": "Ходжа Насреддин",
+          "slug": "nasreddin"
+        },
+        {
+          "id": 64,
+          "kind": "character",
+          "name": "Дед Мороз",
+          "slug": "ded_moroz"
+        },
+        {
+          "id": 65,
+          "kind": "character",
+          "name": "Золотая рыбка",
+          "slug": "goldfish"
+        },
+        {
+          "id": 66,
+          "kind": "character",
+          "name": "Илья Муромец",
+          "slug": "ilya_muromets"
+        },
+        {
+          "id": 67,
+          "kind": "character",
+          "name": "Алёша Попович",
+          "slug": "alesha_popovich"
+        },
+        {
+          "id": 68,
+          "kind": "character",
+          "name": "Владимир Ленин",
+          "slug": "lenin"
+        },
+        {
+          "id": 69,
+          "kind": "character",
+          "name": "Иосиф Сталин",
+          "slug": "stalin"
+        },
+        {
+          "id": 70,
+          "kind": "character",
+          "name": "Адольф Гитлер",
+          "slug": "hitler"
+        },
+        {
+          "id": 71,
+          "kind": "character",
+          "name": "Владимир Путин",
+          "slug": "putin"
+        },
+        {
+          "id": 72,
+          "kind": "character",
+          "name": "Джо Байден",
+          "slug": "biden"
+        },
+        {
+          "id": 73,
+          "kind": "character",
+          "name": "Дональд Трамп",
+          "slug": "trump"
+        },
+        {
+          "id": 74,
+          "kind": "character",
+          "name": "Борис Ельцин",
+          "slug": "yeltsin"
+        },
+        {
+          "id": 75,
+          "kind": "character",
+          "name": "Михаил Горбачёв",
+          "slug": "gorbachev"
+        },
+        {
+          "id": 76,
+          "kind": "character",
+          "name": "Владимир Жириновский",
+          "slug": "zhirinovsky"
+        },
+        {
+          "id": 77,
+          "kind": "character",
+          "name": "Адам",
+          "slug": "adam"
+        },
+        {
+          "id": 78,
+          "kind": "character",
+          "name": "Ева",
+          "slug": "eve"
+        },
+        {
+          "id": 79,
+          "kind": "character",
+          "name": "Святой Пётр",
+          "slug": "saint_peter"
+        },
+        {
+          "id": 80,
+          "kind": "format",
+          "name": "one_liner",
+          "slug": "one_liner"
+        },
+        {
+          "id": 81,
+          "kind": "format",
+          "name": "dialogue",
+          "slug": "dialogue"
+        },
+        {
+          "id": 82,
+          "kind": "format",
+          "name": "story",
+          "slug": "story"
+        },
+        {
+          "id": 83,
+          "kind": "format",
+          "name": "verse",
+          "slug": "verse"
+        },
+        {
+          "id": 84,
+          "kind": "format",
+          "name": "other",
+          "slug": "other"
+        }
+      ],
+      "errorCategory": null
+    },
+    {
+      "name": "rating",
+      "status": 206,
+      "ok": true,
+      "corsReadable": true,
+      "count": "0-2/40225",
+      "rows": [
+        {
+          "id": 13447,
+          "catalog_rating": 4.9962
+        },
+        {
+          "id": 2902,
+          "catalog_rating": 4.9682298
+        },
+        {
+          "id": 1187,
+          "catalog_rating": 4.9679166
+        }
+      ],
+      "errorCategory": null
+    },
+    {
+      "name": "array",
+      "status": 206,
+      "ok": true,
+      "corsReadable": true,
+      "count": "0-2/2898",
+      "rows": [
+        {
+          "id": 4,
+          "term_ids": [
+            1,
+            8,
+            81
+          ]
+        },
+        {
+          "id": 10,
+          "term_ids": [
+            1,
+            32,
+            82
+          ]
+        },
+        {
+          "id": 65,
+          "term_ids": [
+            1,
+            8,
+            81
+          ]
+        }
+      ],
+      "errorCategory": null
+    },
+    {
+      "name": "combined",
+      "status": 206,
+      "ok": true,
+      "corsReadable": true,
+      "count": "0-2/80",
+      "rows": [
+        {
+          "id": 63,
+          "term_ids": [
+            1,
+            4,
+            46,
+            82
+          ]
+        },
+        {
+          "id": 940,
+          "term_ids": [
+            1,
+            3,
+            46,
+            81
+          ]
+        },
+        {
+          "id": 1371,
+          "term_ids": [
+            1,
+            3,
+            46,
+            82
+          ]
+        }
+      ],
+      "errorCategory": null
+    },
+    {
+      "name": "null-rating",
+      "status": 206,
+      "ok": true,
+      "corsReadable": true,
+      "count": "0-2/9993",
+      "rows": [
+        {
+          "id": 271,
+          "catalog_rating": null
+        },
+        {
+          "id": 1209,
+          "catalog_rating": null
+        },
+        {
+          "id": 1476,
+          "catalog_rating": null
+        }
+      ],
+      "errorCategory": null
+    },
+    {
+      "name": "hidden",
+      "status": 200,
+      "ok": true,
+      "corsReadable": true,
+      "count": "*/0",
+      "rows": [],
+      "errorCategory": null
+    }
+  ]
+}

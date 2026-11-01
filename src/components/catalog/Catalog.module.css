@@ -1,0 +1,376 @@
+.layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  min-height: 600px;
+}
+.sidebar {
+  padding: 40px 32px 40px 44px;
+  border-right: 1px solid var(--rule);
+}
+.results {
+  min-width: 0;
+  padding: 26px 48px 48px;
+}
+.intro {
+  font: italic 22px/1.5 var(--reading);
+  color: #655c50;
+  margin-bottom: 22px;
+}
+.search {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--rule);
+  background: #fffaf0a8;
+  border-radius: 4px;
+  min-height: 56px;
+  padding: 8px 16px;
+  box-shadow: 0 4px 14px #49392005;
+  color: var(--muted);
+  gap: 14px;
+}
+.search svg {
+  flex-shrink: 0;
+  color: var(--terracotta);
+}
+.search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  opacity: 1;
+}
+.search label {
+  flex: 1;
+  min-width: 0;
+}
+.search span {
+  border-left: 1px solid var(--rule);
+  padding-left: 20px;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.searchNote {
+  font-size: 12px;
+  margin: 8px 0 20px;
+  color: var(--muted);
+}
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 8px 0 14px;
+  border-bottom: 1px solid var(--rule);
+  color: var(--muted);
+  font-size: 13px;
+}
+.toolbar p {
+  margin: 0;
+}
+.toolbar label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.toolbar select {
+  border: 0;
+  background: transparent;
+  max-width: 220px;
+  padding: 8px 0;
+  min-height: 44px;
+  color: var(--ink);
+}
+.tools {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.random {
+  color: var(--forest);
+  border: 0;
+  padding: 8px 0;
+}
+.active {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+.active button {
+  padding: 5px 10px;
+  min-height: 36px;
+  font-size: 12px;
+  background: #557a610b;
+  border-color: #557a6140;
+}
+.row {
+  padding: 20px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.body {
+  font: 400 18px/1.65 var(--reading);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  text-decoration: none;
+  display: block;
+  max-width: 75ch;
+}
+.body:hover {
+  color: var(--forest);
+}
+.row :global(.tags) {
+  margin-top: 10px;
+}
+.readMore {
+  display: inline-block;
+  font-size: 13px;
+  margin: 10px 0;
+}
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+  font-size: 13px;
+}
+.pagination button {
+  border: 0;
+  padding: 8px 0;
+}
+.pageNumbers {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.pageNumbers button {
+  min-width: 36px;
+  padding: 8px;
+}
+.pageNumbers button[aria-current] {
+  color: var(--forest);
+  font-weight: 500;
+  border-bottom: 2px solid var(--forest);
+  border-radius: 0;
+}
+.filters details {
+  border-top: 1px solid var(--rule);
+  padding: 16px 0;
+}
+.filters summary {
+  font: 600 17px/1.5 var(--reading);
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 28px;
+}
+.filters summary::-webkit-details-marker {
+  display: none;
+}
+.filters details[open] summary {
+  margin-bottom: 12px;
+}
+.filters details[open] summary span {
+  transform: rotate(180deg);
+}
+.contents {
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 10px;
+  color: var(--terracotta);
+  font-weight: 500;
+  margin-bottom: 24px;
+}
+.all {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-left: 3px solid var(--forest);
+  border-radius: 0;
+  font: 600 17px var(--reading);
+  padding: 6px 14px;
+  min-height: 36px;
+  margin: 0 0 22px -4px;
+}
+.options {
+  max-height: 340px;
+  overflow: auto;
+}
+.options label {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-height: 36px;
+  font-size: 13px;
+  color: var(--muted);
+  padding: 3px 2px;
+  cursor: pointer;
+}
+.options input {
+  accent-color: var(--forest);
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+.textButton {
+  border: 0;
+  padding: 6px 0;
+  font-size: 13px;
+  color: var(--forest);
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+.provenance {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 30px;
+}
+.provenance span {
+  color: var(--terracotta);
+}
+.mobileFilters {
+  display: none;
+}
+.sheet {
+  border: 1px solid var(--rule);
+  padding: 24px;
+  background: var(--surface);
+  color: var(--ink);
+  width: min(460px, calc(100% - 24px));
+  max-height: 90dvh;
+  border-radius: 8px;
+  margin: auto;
+}
+.sheet::backdrop {
+  background: #27363188;
+}
+.sheetHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 16px;
+}
+.sheetHeader h2 {
+  margin: 0;
+}
+.sheet .filters {
+  padding-top: 24px;
+}
+.sheetFooter {
+  position: sticky;
+  bottom: -24px;
+  background: var(--surface);
+  padding: 16px 0;
+}
+.sheetFooter button {
+  width: 100%;
+}
+@media (max-width: 1100px) {
+  .layout {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+  .sidebar {
+    padding: 36px 24px;
+  }
+  .results {
+    padding: 30px 32px;
+  }
+  .intro {
+    font-size: 19px;
+  }
+  .tools {
+    gap: 12px;
+  }
+}
+@media (max-width: 900px) {
+  .layout {
+    display: block;
+  }
+  .sidebar {
+    display: none;
+  }
+  .results {
+    padding: 32px 28px;
+  }
+  .mobileFilters {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .toolbar {
+    gap: 8px;
+  }
+  .sheet .options label {
+    min-height: 44px;
+  }
+}
+@media (max-width: 600px) {
+  .results {
+    padding: 30px 20px;
+  }
+  .intro {
+    font-size: 17px;
+    margin-bottom: 22px;
+  }
+  .search {
+    padding: 12px;
+    gap: 10px;
+  }
+  .search input {
+    font-size: 13px;
+  }
+  .search span {
+    display: none;
+  }
+  .toolbar {
+    align-items: flex-start;
+  }
+  .toolbar > p {
+    width: 100%;
+    margin-bottom: 6px;
+  }
+  .tools {
+    width: 100%;
+    justify-content: space-between;
+    gap: 4px 10px;
+  }
+  .toolbar label {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .row {
+    padding: 24px 0;
+  }
+  .body {
+    font-size: 17px;
+    line-height: 1.7;
+  }
+  .pagination {
+    align-items: center;
+    gap: 4px;
+  }
+  .pageNumbers {
+    gap: 0;
+  }
+  .pageNumbers button {
+    min-width: 32px;
+  }
+  .pagination button {
+    font-size: 12px;
+  }
+  .searchNote {
+    font-size: 11px;
+  }
+  .active button {
+    min-height: 44px;
+  }
+}

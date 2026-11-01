@@ -1,0 +1,11 @@
+:root {
+  --paper: #f4e9d4;
+  --surface: #fffaf0;
+  --ink: #273631;
+  --forest: #43644d;
+  --muted: #756b5d;
+  --terracotta: #a35435;
+  --rule: #d5c6ad;
+  --reading: "Literata", Georgia, serif;
+  --ui: "Golos Text", system-ui, sans-serif;
+}

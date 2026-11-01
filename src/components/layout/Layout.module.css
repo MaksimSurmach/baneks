@@ -1,0 +1,132 @@
+.hero {
+  height: 375px;
+  position: relative;
+  background: #443b2a;
+  overflow: hidden;
+}
+.art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+.bar {
+  position: absolute;
+  inset: 0 0 auto;
+  min-height: 72px;
+  padding: 0 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  background: linear-gradient(#241e16a1, #241e1640);
+  border-bottom: 1px solid #fffaf040;
+  color: var(--surface);
+}
+.brand {
+  font: 500 25px/1.4 var(--reading);
+  text-decoration: none;
+}
+.bar a {
+  color: var(--surface);
+  text-shadow: 0 1px 3px #201c14;
+}
+.bar nav {
+  display: flex;
+  align-self: stretch;
+  gap: 40px;
+  font: 18px var(--reading);
+}
+.bar nav a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  border-bottom: 3px solid transparent;
+  padding: 16px 0 12px;
+}
+.bar nav a[aria-current] {
+  border-color: #b4cab6;
+}
+.broken .art {
+  visibility: hidden;
+}
+.broken {
+  background: linear-gradient(110deg, #3c493e, #63513b);
+  height: 180px;
+}
+.main {
+  max-width: 1440px;
+  margin: auto;
+  outline: none;
+}
+.footer {
+  border-top: 1px solid var(--rule);
+  padding: 28px 48px;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.footer span {
+  font-family: var(--reading);
+  font-style: italic;
+}
+@media (min-width: 1700px) {
+  .hero {
+    height: 440px;
+  }
+}
+@media (max-width: 900px) {
+  .hero {
+    height: 280px;
+  }
+  .bar {
+    padding: 0 28px;
+  }
+  .brand {
+    font-size: 21px;
+    max-width: 420px;
+  }
+  .bar nav {
+    gap: 24px;
+  }
+  .footer {
+    padding: 24px 28px;
+  }
+}
+@media (max-width: 600px) {
+  .hero {
+    height: 240px;
+  }
+  .art {
+    object-position: 52% 30%;
+  }
+  .bar {
+    min-height: 110px;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0;
+    padding: 16px 20px 0;
+    background: linear-gradient(#241e16bb, #241e1655);
+  }
+  .brand {
+    font-size: 19px;
+    max-width: 300px;
+  }
+  .bar nav {
+    font-size: 16px;
+    gap: 28px;
+  }
+  .bar nav a {
+    padding: 10px 0;
+  }
+  .footer {
+    padding: 24px 20px;
+    flex-direction: column;
+  }
+  .broken {
+    height: 140px;
+  }
+}
